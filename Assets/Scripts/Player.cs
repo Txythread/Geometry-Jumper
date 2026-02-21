@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
+using System.Numerics;
 using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 public class Player : MonoBehaviour
 {
@@ -49,7 +52,6 @@ public class Player : MonoBehaviour
         
         
         _bottomPos = transform.position + Vector3.down * (PlayerHeight / 2 + 0.01f);
-        _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
     }
 
     public void Jump()
@@ -71,15 +73,26 @@ public class Player : MonoBehaviour
         const int maxDepth = 5;
         
         // The minimal height for the player to count as ungrounded.‚
-        _rayBuffer = Physics2D.Raycast(center.transform.position, Vector2.down, 1f);
-        float minHeightUngrounded = _rayBuffer.distance - 0.5005f;
+        _rayBuffer = Physics2D.Raycast(center.transform.position, Vector2.down, 0.78f);
+
+        if (_rayBuffer.collider == null)
+        {
+            return;
+        }
+        
+        float minHeightUngrounded = _rayBuffer.distance - 0.5f;
+        
+        Debug.DrawLine(center.transform.position + (Vector3.down * 0.5f), center.transform.position + (Vector3.down * (0.5f + minHeightUngrounded)), Color.coral);
+        
+       // Debug.Break();
 
         if (minHeightUngrounded > 0)
         {
-            transform.position += Vector3.up * (minHeightUngrounded - 0.015f);
+            transform.position += Vector3.up * (minHeightUngrounded);
+            //Debug.Break();
             Debug.Log("Grounded");
 
-            if (_rayBuffer.collider != null && depth < maxDepth)
+            if (depth < maxDepth)
             {
                 SetPositionOnGround(++depth);
             }
@@ -91,29 +104,37 @@ public class Player : MonoBehaviour
 
     private void CheckDead()
     {
+        // TODO: Boxcast
         // Check if blocked in front
         bool hit = false;
         
-        const float rayLength = 0.01f;
+        const float rayLength = 0.1f;
+        
+        
+        _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
         
         // Find the bottom
 
-        if (Debug.isDebugBuild)
-        {
-            Debug.DrawLine(_bottomPos, _bottomPos + (Vector3.down * rayLength), Color.brown);
-        }
+        /*if (Debug.isDebugBuild)
+        {*/
+            Debug.DrawLine(_forwardPos, _forwardPos + (Vector3.right * rayLength), Color.brown);
+        //}
         
-        _rayBuffer = Physics2D.Raycast(_forwardPos, Vector2.down, 0.01f, LayerMask.GetMask("Wall"));
+       // Debug.Break();
+        
+        _rayBuffer = Physics2D.Raycast(_forwardPos, Vector2.right, 0.01f, LayerMask.GetMask("Wall"));
         hit |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.up * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.up * 0.3f, Vector2.right, 0.01f, LayerMask.GetMask("Wall"));
         hit |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.down * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.down * 0.3f, Vector2.right, 0.01f, LayerMask.GetMask("Wall"));
         hit |= _rayBuffer.collider != null;
 
         if (hit)
         {
             Dead();
         }
+        
+        
     }
 
     private bool CheckGrounded()
