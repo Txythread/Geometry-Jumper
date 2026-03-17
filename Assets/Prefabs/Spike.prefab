@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &591601915399246469
+--- !u!1 &261954548410594360
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7738910634345919905}
-  - component: {fileID: 786908653147969186}
-  - component: {fileID: 8051668443514091233}
-  - component: {fileID: 7428467772486702994}
-  - component: {fileID: 1004901041265002150}
+  - component: {fileID: 2187924518350547177}
+  - component: {fileID: 5269481827687364261}
+  - component: {fileID: 6884782585147483120}
+  - component: {fileID: 8773828258077846675}
+  - component: {fileID: 2432102480675175161}
   m_Layer: 11
   m_Name: Spike
   m_TagString: Untagged
@@ -20,29 +20,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7738910634345919905
+--- !u!4 &2187924518350547177
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591601915399246469}
+  m_GameObject: {fileID: 261954548410594360}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.156, y: -0.845, z: 0}
+  m_LocalPosition: {x: 9.069, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &786908653147969186
+--- !u!212 &5269481827687364261
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591601915399246469}
+  m_GameObject: {fileID: 261954548410594360}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -94,27 +94,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &8051668443514091233
+--- !u!114 &6884782585147483120
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591601915399246469}
+  m_GameObject: {fileID: 261954548410594360}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e3138a0dd1997417497c5732bed94e27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelObject
   layer: 2
-  levelPosition: {x: 0, y: 0}
---- !u!61 &7428467772486702994
+  levelPosition: {x: 0, y: -0.82}
+  textureName: spike
+  reloadTexture: 1
+--- !u!61 &8773828258077846675
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591601915399246469}
+  m_GameObject: {fileID: 261954548410594360}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -154,13 +156,13 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.31, y: 0.48}
   m_EdgeRadius: 0
---- !u!331 &1004901041265002150
+--- !u!331 &2432102480675175161
 SpriteMask:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 591601915399246469}
+  m_GameObject: {fileID: 261954548410594360}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1

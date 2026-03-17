@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
     /// The speed used to rotate the player back into normal after touching the ground
     /// </summary>
     [SerializeField] private float rotationSpeedOnGround;
+
     [FormerlySerializedAs("targetRotation")] [SerializeField] private float targetRotationDistance;
     
     private const float PlayerHeight = 1f;
@@ -44,7 +45,7 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Application.targetFrameRate = 240;
+      //  Application.targetFrameRate = 240;
         gameActionMap = InputActionMap.FromJson(System.IO.File.ReadAllText(Application.dataPath + "/InputSystem_Actions.inputactions"))[0];
         gameActionMap.Enable();
 
@@ -76,12 +77,11 @@ public class Player : MonoBehaviour
                 break;
         }
 
-        var posChangeY = velocityY;
+        var posChangeY = velocityY * Time.deltaTime;
 
 
         if (CheckGrounded() && targetRotationDistance == 0)
         {
-            var originalDist = targetRotationDistance;
             targetRotationDistance = Mathf.Abs((currentRotation % 90));
 
             if (targetRotationDistance < 5 | targetRotationDistance > 85)
@@ -188,7 +188,7 @@ public class Player : MonoBehaviour
 
         if (minHeightUngrounded <= 0) return;
         
-        transform.position += Vector3.up * (minHeightUngrounded);
+        transform.position += Vector3.up * (minHeightUngrounded - 0.05f);
 
         if (depth < maxDepth)
         {
