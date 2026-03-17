@@ -29,6 +29,8 @@ public class Player : MonoBehaviour
     /// </summary>
     [SerializeField] private float rotationSpeedOnGround;
 
+    [SerializeField] private float maximumVelocity;
+
     [FormerlySerializedAs("targetRotation")] [SerializeField] private float targetRotationDistance;
     
     private const float PlayerHeight = 1f;
@@ -73,7 +75,7 @@ public class Player : MonoBehaviour
         switch (_mode)
         {
             case ControlMode.Normal:
-                velocityY += Gravity * Time.deltaTime;
+                SetVelocityY(velocityY + Gravity * Time.deltaTime);
                 break;
         }
 
@@ -148,6 +150,8 @@ public class Player : MonoBehaviour
         
         _lastFrameGrounded = grounded;
         
+        
+        
         gameObject.transform.position += Vector3.up * posChangeY;
 
         if (_jumpingBlockedFrames > 0)
@@ -158,7 +162,7 @@ public class Player : MonoBehaviour
         CheckDead();
     }
     
-     private void Jump()
+    private void Jump()
     {
         // The minimal height for the player to count as ungrounded.
         SetPositionOnGround();
@@ -170,6 +174,28 @@ public class Player : MonoBehaviour
         }
 
         _jumpingBlockedFrames = 3;
+    }
+
+    /// <summary>
+    /// Changes the velocity and checks that the maximum velocity is not exceeded.
+    /// </summary>
+    /// <param name="force">How much to add.</param>
+    private void SetVelocityY(float force)
+    {
+        var newVelocityY = force;
+        
+        if (force > velocityY && newVelocityY > maximumVelocity)
+        {
+            newVelocityY = maximumVelocity;
+            Debug.Log("Max velocity reached");
+        }
+        else if (force < velocityY && newVelocityY < -maximumVelocity)
+        {
+            newVelocityY = -maximumVelocity;
+            Debug.Log("Min velocity reached");
+        }
+
+        velocityY = newVelocityY;
     }
 
     private void SetPositionOnGround(int depth = 0)
