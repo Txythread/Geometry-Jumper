@@ -6,7 +6,7 @@ using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
 
-public class LevelObject : MonoBehaviour
+public  class LevelObject : MonoBehaviour
 {
     [SerializeField] public GameLayer layer;
     [SerializeField] private Vector2 levelPosition;
@@ -17,13 +17,13 @@ public class LevelObject : MonoBehaviour
     
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private void Start()
+    protected virtual void Start()
     {
         if (reloadTexture) StartCoroutine(LateStart());
         else initialized = true;
     }
 
-    IEnumerator LateStart()
+    public IEnumerator LateStart()
     {
         yield return null; // Wait one frame
         
@@ -32,7 +32,8 @@ public class LevelObject : MonoBehaviour
         
         initialized = true;
     }
-    
+
+
     
 
     // Update is called once per frame

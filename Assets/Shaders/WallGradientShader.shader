@@ -2,8 +2,7 @@ Shader "Custom/WallGradientShader"
 {
     Properties
     {
-        _TopColor ("Top Color", Color) = (1,0,0,1)
-        _BottomColor ("Bottom Color", Color) = (0,0,1,1)
+        _SurroundingColor ("Surrounding Color", Color) = (1,0,0,1)
         _MainTex ("Sprite Texture", 2D) = "white" {}
         _CenterColor ("Center Color", Color) = (1,0,0,1)
         _Range ("Range", Float) = 5.0
@@ -46,8 +45,8 @@ Shader "Custom/WallGradientShader"
             };
 
             sampler2D _MainTex;
-            float4 _TopColor;
-            float4 _BottomColor;
+            float4 _SurroundingColor;
+            float4 _CenterColor;
             float _Direction;
             float _Range;
             float _OffsetX;
@@ -68,7 +67,7 @@ Shader "Custom/WallGradientShader"
                 
                 fixed4 tex = tex2D(_MainTex, i.uv);
 
-                fixed4 gradient = lerp(_BottomColor, _TopColor, t);
+                fixed4 gradient = lerp(_CenterColor, _SurroundingColor, t);
                 gradient.a *= tex.a * i.color.a;
 
                 return gradient;

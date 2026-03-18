@@ -30,6 +30,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotationSpeedOnGround;
 
     [SerializeField] private float maximumVelocity;
+    
+
+    private int frameCount = 0;
 
     [FormerlySerializedAs("targetRotation")] [SerializeField] private float targetRotationDistance;
     
@@ -65,6 +68,10 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+        frameCount++;
+        
+        if (frameCount < 5) return;
+        
         _origin = transform.position - (Vector3.left + Vector3.up) * (PlayerHeight / 2 - 0.1f);
         _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
         
