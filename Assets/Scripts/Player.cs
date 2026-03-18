@@ -187,12 +187,10 @@ public class Player : MonoBehaviour
         if (force > velocityY && newVelocityY > maximumVelocity)
         {
             newVelocityY = maximumVelocity;
-            Debug.Log("Max velocity reached");
         }
         else if (force < velocityY && newVelocityY < -maximumVelocity)
         {
             newVelocityY = -maximumVelocity;
-            Debug.Log("Min velocity reached");
         }
 
         velocityY = newVelocityY;
