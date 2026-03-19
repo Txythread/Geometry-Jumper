@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private string textureDir;
     [SerializeField] private float gameSpeed;
     [SerializeField] private LevelObject spike;
+    [SerializeField] private Material wallMaterial;
 
 
     public static Sprite GetTexture(string textureName)
@@ -33,6 +34,8 @@ public class GameManager : MonoBehaviour
         
         textureDir = textureDir.Replace("$ASSETS_PATH", Application.dataPath);
         texturePath = textureDir;
+        
+        wallMaterial.SetColor("_CenterColor", Color.blue);
     }
 
     private void OnDestroy()

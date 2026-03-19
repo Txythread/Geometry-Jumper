@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Transactions;
 using NUnit.Framework.Constraints;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -82,54 +83,58 @@ public class Player : MonoBehaviour
     {
         _frameCount++;
         
-        if (_frameCount < 5) return;
+        if (_frameCount < 2) return;
 
-        // True if it should count as if the player clicked in this 'frame' (tho it's actually more complicated)
-        bool initialActionStart = false;
-        
-        // True if the player inputs something or it should still count as if
-        bool actionPersist = false;
-        
-        if (_jumpAction.inProgress)
-        {
-            actionPersist = true;
-            
-            if (_inputEarlyDelay == 0) _inputEarlyDelay = maximumInputDiscrepancy;
-        }
-        
-        if (_inputEarlyDelay > 0)
-        {
-            initialActionStart = true;
-            _inputEarlyDelay -= Time.deltaTime;
-            
-            if (_inputEarlyDelay < 0) _inputEarlyDelay = 0;
-        }
+        var (actionStart,  actionPersist) = GetInputs();
 
         
-        
+        // Update globals to current values
         _origin = transform.position - (Vector3.left + Vector3.up) * (PlayerHeight / 2 - 0.1f);
         _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
         
-        float currentRotation = transform.rotation.eulerAngles.z;
-
-
-        // Update gravity
-        switch (_mode)
-        {
-            case ControlMode.Normal:
-                SetVelocityY(velocityY + Gravity * Time.deltaTime);
-                break;
-        }
+        var currentRotation = transform.rotation.eulerAngles.z;
+        HandleGravity();
 
         var posChangeY = velocityY * Time.deltaTime;
-
-
+        
+        // Jump if necessary
         if (CheckGrounded() && actionPersist)
         {
             _inputEarlyDelay = 0;
             Jump();
         }
 
+        
+        HandleRotationAndLanding(ref currentRotation, ref posChangeY);
+        
+        _lastFrameGrounded = grounded;
+        
+        gameObject.transform.position += Vector3.up * posChangeY;
+
+        if (_jumpingBlockedFrames > 0)
+        {
+            _jumpingBlockedFrames--;
+        }
+        
+        CheckDead();
+    }
+
+    private void HandleGravity()
+    {
+        // Update gravity
+        switch (_mode)
+        {
+            case ControlMode.Normal:
+                float deltaTime = Time.deltaTime > 0.05f ? 0.05f : Time.deltaTime;
+                SetVelocityY(velocityY + Gravity * deltaTime);
+                break;
+        }
+    }
+
+    private void HandleRotationAndLanding(ref float currentRotation, ref float posChangeY)
+    {
+        // Calculate the rotation distance if the player is grounded but not
+        // in a position where it can stay (non 90° aligned rotation)
         if (grounded && targetRotationDistance == 0)
         {
             targetRotationDistance = Mathf.Abs((currentRotation % 90));
@@ -153,17 +158,18 @@ public class Player : MonoBehaviour
             
         }
         
-
         if (grounded && _jumpingBlockedFrames == 0)
         {
             posChangeY = 0;
             velocityY = 0;
 
+            // Make sure to get to the ground exactly
             if (!_lastFrameGrounded)
             {
                 SetPositionOnGround();
             }
 
+            // Handle rotation on ground
             if (targetRotationDistance > 3 | targetRotationDistance < -3)
             {
                 var frameNewRotation = rotationSpeedOnGround * Time.deltaTime;
@@ -171,7 +177,6 @@ public class Player : MonoBehaviour
                 {
                     transform.Rotate(Vector3.back, targetRotationDistance);
                     targetRotationDistance = 0;
-                    Debug.Log("Reseted target rot");
                 }
                 else
                 {
@@ -194,25 +199,40 @@ public class Player : MonoBehaviour
             var frameNewRotation = rotationSpeed * Time.deltaTime;
             transform.Rotate(Vector3.back, frameNewRotation);
         }
-        
-        
-        _lastFrameGrounded = grounded;
-        
-        
-        
-        gameObject.transform.position += Vector3.up * posChangeY;
+    }
 
-        if (_jumpingBlockedFrames > 0)
+    /// <summary>
+    /// Gets the inputs and preprocesses them
+    /// </summary>
+    /// <returns>(inputStart, persistentInput)</returns>
+    private (bool, bool) GetInputs()
+    {
+        // True if it should count as if the player clicked in this 'frame' (tho it's actually more complicated)
+        var initialActionStart = false;
+        
+        // True if the player inputs something or it should still count as if
+        var actionPersist = false;
+        
+        if (_jumpAction.inProgress)
         {
-            _jumpingBlockedFrames--;
+            actionPersist = true;
+            
+            if (_inputEarlyDelay == 0) _inputEarlyDelay = maximumInputDiscrepancy;
         }
         
-        CheckDead();
+        if (_inputEarlyDelay > 0)
+        {
+            initialActionStart = true;
+            _inputEarlyDelay -= Time.deltaTime;
+            
+            if (_inputEarlyDelay < 0) _inputEarlyDelay = 0;
+        }
+        
+        return (initialActionStart, actionPersist);
     }
     
     private void Jump()
     {
-        // The minimal height for the player to count as ungrounded.
         SetPositionOnGround();
         if (grounded)
         {

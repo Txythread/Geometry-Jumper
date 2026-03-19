@@ -14,12 +14,9 @@ public  class LevelObject : MonoBehaviour
     [SerializeField] private string textureName;
     [SerializeField] private bool reloadTexture;
     
-    private bool initialized = false;
+    private bool initialized;
 
-    protected virtual void Awake()
-    {
-        
-    }
+    protected virtual void Awake() { }
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
