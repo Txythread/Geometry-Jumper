@@ -61,11 +61,19 @@ Shader "Custom/WallGradientShader"
             }
 
             fixed4 frag(v2f i) : SV_Target {
+                fixed4 tex = tex2D(_MainTex, i.uv);
+
+                // Exit early if needed to save time
+                if (tex.a == 0.0f)
+                {
+                    return tex;
+                }
+                
                 float dist = abs(i.worldPos.x - _OffsetX);
                 float t = saturate(dist / _Range);
                 
                 
-                fixed4 tex = tex2D(_MainTex, i.uv);
+                
 
                 fixed4 gradient = lerp(_CenterColor, _SurroundingColor, t);
                 gradient.a *= tex.a * i.color.a;

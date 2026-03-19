@@ -23,7 +23,7 @@ public class Wall : LevelObject
     [SerializeField] private GameObject rightBound;
     [SerializeField] private GameObject bottomBound;
 
-    protected override void Start()
+    protected override void Awake()
     {
         base.Start();
 

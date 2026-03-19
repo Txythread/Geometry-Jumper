@@ -31,8 +31,13 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float maximumVelocity;
     
+    /// <summary>
+    /// How many seconds an input might be early before it doesn't count anymore.
+    /// </summary>
+    [SerializeField] private float maximumInputDiscrepancy;
+    
 
-    private int frameCount = 0;
+    private int _frameCount = 0;
 
     [FormerlySerializedAs("targetRotation")] [SerializeField] private float targetRotationDistance;
     
@@ -44,6 +49,12 @@ public class Player : MonoBehaviour
     private Vector3 _bottomPos;
     private Vector3 _forwardPos;
     private Vector2 _origin;
+    private InputAction _jumpAction;
+
+    /// <summary>
+    /// How many seconds there are left before the input is invalid
+    /// </summary>
+    private float _inputEarlyDelay;
     
     private ControlMode _mode = ControlMode.Normal;
     
@@ -56,7 +67,8 @@ public class Player : MonoBehaviour
 
         
         gameActionMap.FindAction("Jump").Enable();
-        gameActionMap.FindAction("Jump").performed += _ => Jump();
+        _jumpAction = gameActionMap.FindAction("Jump");
+        
         
         
         _bottomPos = transform.position + Vector3.down * (PlayerHeight / 2 + 0.01f);
@@ -68,9 +80,32 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        frameCount++;
+        _frameCount++;
         
-        if (frameCount < 5) return;
+        if (_frameCount < 5) return;
+
+        // True if it should count as if the player clicked in this 'frame' (tho it's actually more complicated)
+        bool initialActionStart = false;
+        
+        // True if the player inputs something or it should still count as if
+        bool actionPersist = false;
+        
+        if (_jumpAction.inProgress)
+        {
+            actionPersist = true;
+            
+            if (_inputEarlyDelay == 0) _inputEarlyDelay = maximumInputDiscrepancy;
+        }
+        
+        if (_inputEarlyDelay > 0)
+        {
+            initialActionStart = true;
+            _inputEarlyDelay -= Time.deltaTime;
+            
+            if (_inputEarlyDelay < 0) _inputEarlyDelay = 0;
+        }
+
+        
         
         _origin = transform.position - (Vector3.left + Vector3.up) * (PlayerHeight / 2 - 0.1f);
         _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
@@ -89,7 +124,13 @@ public class Player : MonoBehaviour
         var posChangeY = velocityY * Time.deltaTime;
 
 
-        if (CheckGrounded() && targetRotationDistance == 0)
+        if (CheckGrounded() && actionPersist)
+        {
+            _inputEarlyDelay = 0;
+            Jump();
+        }
+
+        if (grounded && targetRotationDistance == 0)
         {
             targetRotationDistance = Mathf.Abs((currentRotation % 90));
 

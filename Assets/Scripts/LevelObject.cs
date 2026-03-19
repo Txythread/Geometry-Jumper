@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Numerics;
 using Unity.Mathematics;
@@ -14,8 +15,13 @@ public  class LevelObject : MonoBehaviour
     [SerializeField] private bool reloadTexture;
     
     private bool initialized = false;
-    
-    
+
+    protected virtual void Awake()
+    {
+        
+    }
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
     {
