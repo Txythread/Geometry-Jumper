@@ -24,6 +24,7 @@ public  class LevelObject : MonoBehaviour
     {
         if (reloadTexture) StartCoroutine(LateStart());
         else initialized = true;
+        levelPosition = (Vector2)transform.position;
     }
 
     public IEnumerator LateStart()
@@ -31,7 +32,7 @@ public  class LevelObject : MonoBehaviour
         yield return null; // Wait one frame
         
         GetComponent<SpriteRenderer>().sprite = GameManager.GetTexture(textureName);
-        levelPosition = (Vector2)transform.position/* + Vector2.right * GameManager.gameCenterX*/;
+        /* + Vector2.right * GameManager.gameCenterX*/;
         
         initialized = true;
     }
@@ -46,7 +47,10 @@ public  class LevelObject : MonoBehaviour
         
         transform.position = new Vector3(levelPosition.x - GameManager.gameCenterX, levelPosition.y, 0);
         
+        EndUpdate();
     }
+    
+    protected virtual void EndUpdate() {}
 }
 
 public enum GameObjectType: byte
