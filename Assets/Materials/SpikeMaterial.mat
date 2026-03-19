@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Walll1Material
-  m_Shader: {fileID: 4800000, guid: fe418f6e7b83847aebf65d0917f5ecfd, type: 3}
+  m_Name: SpikeMaterial
+  m_Shader: {fileID: 4800000, guid: 4191a5695ce544adbb5be4286d08caca, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -36,22 +36,20 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 61e25b616250d41baa335a8d64cbcb2f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1d3fce02c51864745abbe42431db5e6a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Direction: 0
     - _EnableExternalAlpha: 0
-    - _OffsetX: -15.5
-    - _Range: 10
+    - _OffsetX: -15
+    - _Range: 13
     - _ZWrite: 0
     m_Colors:
-    - _BottomColor: {r: 0, g: 0, b: 1, a: 1}
-    - _CenterColor: {r: 1, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _SurroundingColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TopColor: {r: 1, g: 0, b: 0.180789, a: 1}
+    - _TopColor: {r: 0.94509804, g: 0.11165461, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

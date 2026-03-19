@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
         textureDir = textureDir.Replace("$ASSETS_PATH", Application.dataPath);
         texturePath = textureDir;
         
-        wallMaterial.SetColor("_CenterColor", Color.blue);
+        wallMaterial.SetColor("_CenterColor", Color.red);
     }
 
     private void OnDestroy()

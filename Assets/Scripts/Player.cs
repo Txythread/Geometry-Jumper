@@ -125,7 +125,7 @@ public class Player : MonoBehaviour
         switch (_mode)
         {
             case ControlMode.Normal:
-                float deltaTime = Time.deltaTime > 0.05f ? 0.05f : Time.deltaTime;
+                var deltaTime = Time.deltaTime > 0.05f ? 0.05f : Time.deltaTime;
                 SetVelocityY(velocityY + Gravity * deltaTime);
                 break;
         }
