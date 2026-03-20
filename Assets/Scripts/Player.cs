@@ -117,6 +117,8 @@ public class Player : MonoBehaviour
         }
         
         CheckDead();
+        
+        PerformInteractions(actionStart);
     }
 
     private void HandleGravity()
@@ -231,7 +233,7 @@ public class Player : MonoBehaviour
         return (initialActionStart, actionPersist);
     }
     
-    private void Jump()
+    public void Jump()
     {
         SetPositionOnGround();
         if (grounded)
@@ -242,6 +244,28 @@ public class Player : MonoBehaviour
         }
 
         _jumpingBlockedFrames = 3;
+    }
+
+    /// <summary>
+    /// Checks which interactable objects the player touches and
+    /// potentially triggers their onInteract actions.
+    /// </summary>
+    private void PerformInteractions(bool interactionStarted)
+    {
+        Vector2 origin = transform.position;
+        var size = new Vector2(PlayerHeight, PlayerHeight);
+        float angle = 0;
+        var hit = Physics2D.OverlapBox(origin, size, angle, LayerMask.GetMask("Interactable"));
+
+        if (hit.collider != null)
+        {
+            Debug.Log("Hit");
+            Debug.Log(hit.transform.GetComponent(nameof(Orb)));
+        }
+        else
+        {
+            Debug.Log("No Hits");
+        }
     }
 
     /// <summary>

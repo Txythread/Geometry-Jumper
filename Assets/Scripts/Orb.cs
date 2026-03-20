@@ -1,10 +1,8 @@
-
-
-
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class Orb : LevelObject
+public class Orb : LevelObject, Interactable
 {
     /// <summary>
     /// How a growth/shrinking stage takes
@@ -18,6 +16,7 @@ public class Orb : LevelObject
     [SerializeField] private ParticleSystem particles;
 
     [SerializeField] private Color color;
+    [SerializeField] private UnityEvent<Player> onInteract;
 
     private float _currentStageTimeCounter;
     private bool _isGrowing = true;
@@ -35,6 +34,11 @@ public class Orb : LevelObject
         colorOverLifetime.color = new ParticleSystem.MinMaxGradient(color, Color.white.WithAlpha(0.2f));
         
         _originalSurrounderSize = surroundingCircle.transform.localScale.x;
+    }
+
+    public void Interact(Player player)
+    {
+        onInteract.Invoke(player);
     }
 
     protected override void EndUpdate()
@@ -63,3 +67,4 @@ public class Orb : LevelObject
         
     }
 }
+
