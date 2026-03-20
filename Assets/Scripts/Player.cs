@@ -17,13 +17,21 @@ public class Player : MonoBehaviour
     /// <summary>
     ///  Gravity in m/s.
     /// </summary>
-    [SerializeField] private float Gravity;
-    
+    [FormerlySerializedAs("Gravity")] [SerializeField] private float gravity;
     [SerializeField] private bool grounded;
     [SerializeField] private GameObject center;
-    [SerializeField] private float velocityY = 0;
+    /// <summary>
+    /// The current velocity on the jumping axis
+    /// </summary>
+    [SerializeField] private float velocityY;
     [SerializeField] private InputActionMap gameActionMap;
+    /// <summary>
+    /// How strong a normal jump is
+    /// </summary>
     [SerializeField] private float jumpVelocity;
+    /// <summary>
+    /// The speed used to rotate the player while in the air
+    /// </summary>
     [SerializeField] private float rotationSpeed;
     /// <summary>
     /// The speed used to rotate the player back into normal after touching the ground
@@ -43,14 +51,23 @@ public class Player : MonoBehaviour
     [FormerlySerializedAs("targetRotation")] [SerializeField] private float targetRotationDistance;
     
     private const float PlayerHeight = 1f;
-    private bool _lastFrameGrounded = false;
+    private bool _lastFrameGrounded;
+    /// <summary>
+    /// The game blocks jumping for 3 frames to prevent
+    /// one input being processed as multiple inputs
+    /// </summary>
     private byte _jumpingBlockedFrames;
     
+    ////////////////////////////////
+    ////  Variables as buffers  ////
+    //// Better for performance ////
+    ////////////////////////////////
     private RaycastHit2D _rayBuffer;
     private Vector3 _bottomPos;
     private Vector3 _forwardPos;
     private Vector2 _origin;
     private InputAction _jumpAction;
+    private string[] _wallSearchMap;
 
     /// <summary>
     /// How many seconds there are left before the input is invalid.
@@ -77,6 +94,8 @@ public class Player : MonoBehaviour
         
         gameActionMap.FindAction("Jump").Enable();
         _jumpAction = gameActionMap.FindAction("Jump");
+
+        _wallSearchMap = new [] { "Wall" };
         
         
         
@@ -138,7 +157,7 @@ public class Player : MonoBehaviour
         {
             case ControlMode.Normal:
                 var deltaTime = Time.deltaTime > 0.05f ? 0.05f : Time.deltaTime;
-                SetVelocityY(velocityY + Gravity * deltaTime);
+                SetVelocityY(velocityY + gravity * deltaTime);
                 break;
         }
     }
@@ -248,11 +267,11 @@ public class Player : MonoBehaviour
         return (initialActionStart, actionPersist);
     }
     
-    public void Jump()
+    public void Jump(float multiplier = 1)
     {
         grounded = false;
         transform.position += Vector3.up * 0.4f;
-        velocityY = jumpVelocity;
+        velocityY = jumpVelocity * multiplier;
 
         _jumpingBlockedFrames = 3;
     }
@@ -366,11 +385,11 @@ public class Player : MonoBehaviour
         const float rayLength = 0.01f;
         
         
-        _rayBuffer = Physics2D.Raycast(_forwardPos, Vector2.right, rayLength, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_forwardPos, Vector2.right, rayLength, LayerMask.GetMask(_wallSearchMap));
         hit |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.up * 0.3f, Vector2.right, rayLength, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.up * 0.3f, Vector2.right, rayLength, LayerMask.GetMask(_wallSearchMap));
         hit |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.down * 0.3f, Vector2.right, rayLength, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.down * 0.3f, Vector2.right, rayLength, LayerMask.GetMask(_wallSearchMap));
         hit |= _rayBuffer.collider != null;
 
         if (hit) Die();

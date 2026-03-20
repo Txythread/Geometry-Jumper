@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &1616805556740367422
+--- !u!1001 &3098626394414217664
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -50,67 +50,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3764336432379719177, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: m_Name
-      value: OrbJumpMedium
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: color.a
-      value: 1
+      value: OrbJumpHigh
       objectReference: {fileID: 0}
     - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: color.b
-      value: 0.007843138
+      value: 0.2729004
       objectReference: {fileID: 0}
     - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: color.g
-      value: 0.9882353
+      value: 0.2028302
       objectReference: {fileID: 0}
     - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: color.r
-      value: 0.99215686
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: interactionType
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 11500000, guid: b7a0e8d1f6c94995a6c8786af8bc3f83, type: 3}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_BoolArgument
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: onInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: 
+    - target: {fileID: 8665429959418428674, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
+      propertyPath: m_Color.b
+      value: 0.08203983
       objectReference: {fileID: 0}
     - target: {fileID: 8665429959418428674, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: m_Color.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8665429959418428674, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
-      propertyPath: m_Color.r
-      value: 0.9379643
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -43,9 +43,14 @@ public class Orb : LevelObject, Interactable
             case InteractionType.None: 
                 Debug.LogWarning("Orb with null interaction type");
                 break;
+            case InteractionType.JumpLow:
+                player.Jump(0.5f);
+                break;
             case InteractionType.JumpMedium:
-                Debug.Log("Triggering jump on player: " + player);
                 player.Jump();
+                break;
+            case InteractionType.JumpHigh:
+                player.Jump(1.5f);
                 break;
         }
     }
@@ -79,5 +84,5 @@ public class Orb : LevelObject, Interactable
 
 enum InteractionType
 {
-    None, JumpMedium
+    None, JumpLow, JumpMedium, JumpHigh
 }
