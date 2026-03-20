@@ -16,8 +16,8 @@ public class Orb : LevelObject, Interactable
     [SerializeField] private ParticleSystem particles;
 
     [SerializeField] private Color color;
-    [SerializeField] private UnityEvent<Player> onInteract;
-
+    [SerializeField] private InteractionType interactionType;
+    
     private float _currentStageTimeCounter;
     private bool _isGrowing = true;
     private float _originalSurrounderSize;
@@ -38,7 +38,16 @@ public class Orb : LevelObject, Interactable
 
     public void Interact(Player player)
     {
-        onInteract.Invoke(player);
+        switch (interactionType)
+        {
+            case InteractionType.None: 
+                Debug.LogWarning("Orb with null interaction type");
+                break;
+            case InteractionType.JumpMedium:
+                Debug.Log("Triggering jump on player: " + player);
+                player.Jump();
+                break;
+        }
     }
 
     protected override void EndUpdate()
@@ -68,3 +77,7 @@ public class Orb : LevelObject, Interactable
     }
 }
 
+enum InteractionType
+{
+    None, JumpMedium
+}

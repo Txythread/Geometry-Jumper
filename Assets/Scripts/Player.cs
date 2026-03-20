@@ -53,9 +53,17 @@ public class Player : MonoBehaviour
     private InputAction _jumpAction;
 
     /// <summary>
-    /// How many seconds there are left before the input is invalid
+    /// How many seconds there are left before the input is invalid.
+    /// Special values:
+    /// Above 0: The action would still be valid
+    /// 0: The action was triggered but the start expired although the action persists
+    /// -1: The action start expired and the action already ended
+    ///
+    /// It might expire due to a multitude of factors:
+    /// 1. Timer Expires, self-explanatory
+    /// 2. It has been used already
     /// </summary>
-    private float _inputEarlyDelay;
+    [SerializeField] private float _inputEarlyDelay = -1;
     
     private ControlMode _mode = ControlMode.Normal;
     
@@ -101,7 +109,9 @@ public class Player : MonoBehaviour
         if (CheckGrounded() && actionPersist)
         {
             _inputEarlyDelay = 0;
-            Jump();
+            SetPositionOnGround();
+
+            if (grounded) Jump();
         }
 
         
@@ -219,7 +229,12 @@ public class Player : MonoBehaviour
         {
             actionPersist = true;
             
-            if (_inputEarlyDelay == 0) _inputEarlyDelay = maximumInputDiscrepancy;
+            if (_inputEarlyDelay == -1) _inputEarlyDelay = maximumInputDiscrepancy;
+            
+        }
+        else if (_inputEarlyDelay == 0)
+        {
+            _inputEarlyDelay = -1;
         }
         
         if (_inputEarlyDelay > 0)
@@ -227,7 +242,7 @@ public class Player : MonoBehaviour
             initialActionStart = true;
             _inputEarlyDelay -= Time.deltaTime;
             
-            if (_inputEarlyDelay < 0) _inputEarlyDelay = 0;
+            if (_inputEarlyDelay <= 0) _inputEarlyDelay = 0; 
         }
         
         return (initialActionStart, actionPersist);
@@ -235,13 +250,9 @@ public class Player : MonoBehaviour
     
     public void Jump()
     {
-        SetPositionOnGround();
-        if (grounded)
-        {
-            grounded = false;
-            transform.position += Vector3.up * 0.4f;
-            velocityY = jumpVelocity;
-        }
+        grounded = false;
+        transform.position += Vector3.up * 0.4f;
+        velocityY = jumpVelocity;
 
         _jumpingBlockedFrames = 3;
     }
@@ -252,19 +263,25 @@ public class Player : MonoBehaviour
     /// </summary>
     private void PerformInteractions(bool interactionStarted)
     {
+        if (!interactionStarted) return;
+        
         Vector2 origin = transform.position;
         var size = new Vector2(PlayerHeight, PlayerHeight);
         float angle = 0;
-        var hit = Physics2D.OverlapBox(origin, size, angle, LayerMask.GetMask("Interactable"));
+        const string maskName = "Interactable";
+        var layer = LayerMask.GetMask(maskName);
+        var hit = Physics2D.OverlapBox(origin, size, angle, layer);
 
-        if (hit.collider != null)
+        if (hit != null)
         {
-            Debug.Log("Hit");
-            Debug.Log(hit.transform.GetComponent(nameof(Orb)));
-        }
-        else
-        {
-            Debug.Log("No Hits");
+            Interactable interactable = hit.GetComponent<Interactable>();
+
+            if (interactable == null) return;
+            
+            interactable.Interact(this);
+            
+            // Make sure no other interaction can follow until it's pressed again
+            _inputEarlyDelay = 0;
         }
     }
 
@@ -368,6 +385,7 @@ public class Player : MonoBehaviour
     
     private void Die()
     {
+        Debug.Break();
         Destroy(gameObject);
     }
 }
