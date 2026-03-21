@@ -128,6 +128,8 @@ public class Player : MonoBehaviour
         SnapToContinuousWallCheckPosition();
         _lastFramePosition = transform.position;
         
+        CheckDead();
+        
         // Update globals to current values
         _origin = transform.position - (Vector3.left + Vector3.up) * (PlayerHeight / 2 - 0.1f);
         _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
@@ -160,7 +162,6 @@ public class Player : MonoBehaviour
             _jumpingBlockedFrames--;
         }
         
-        CheckDead();
         
         
     }
@@ -488,6 +489,30 @@ public class Player : MonoBehaviour
         Debug.Log("Died");
         Debug.Break();
         //Destroy(gameObject);
+    }
+
+    public void ReverseGravity()
+    {
+        gravity = -gravity;
+
+        if (gravity < 0)
+        {
+            transform.position += Vector3.up;
+        }
+        else
+        {
+            transform.position -= Vector3.down;
+        }
+    }
+
+    public void ReverseVelocity()
+    {
+        velocityY = -velocityY;
+    }
+
+    public void ZeroVelocity()
+    {
+        velocityY = 0;
     }
 }
 

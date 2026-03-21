@@ -68,6 +68,16 @@ public class Orb : LevelObject, IInteractable
             case InteractionType.JumpHigh:
                 player.Jump(1.5f);
                 break;
+            case InteractionType.Gravity:
+                player.ZeroVelocity();
+                player.ReverseGravity();
+                player.ReverseVelocity();
+                break;
+            case InteractionType.GravityJump:
+                player.ZeroVelocity();
+                player.ReverseGravity();
+                player.Jump();
+                break;
         }
     }
 
@@ -100,5 +110,5 @@ public class Orb : LevelObject, IInteractable
 
 enum InteractionType
 {
-    None, JumpLow, JumpMedium, JumpHigh
+    None, JumpLow, JumpMedium, JumpHigh, Gravity, GravityJump
 }
