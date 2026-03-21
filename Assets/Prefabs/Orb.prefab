@@ -79,7 +79,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 13
+  m_SortingOrder: 6
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 0.74616504, b: 0, a: 1}
@@ -148,6 +148,7 @@ MonoBehaviour:
   particles: {fileID: 6636333313262578884}
   color: {r: 0.99215686, g: 0.8448355, b: 0.007843125, a: 0}
   interactionType: 0
+  interactionVisualDelayTime: 0
 --- !u!58 &7956893748211747361
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -263,7 +264,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 12
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2304747841654226217, guid: 7b40f3cb42f0345108a656d681edf5f0, type: 3}
   m_Color: {r: 0.99215686, g: 0.9882353, b: 0.007843138, a: 0.57254905}
@@ -5078,7 +5079,7 @@ ParticleSystemRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 12
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_RenderMode: 0
   m_MeshDistribution: 0

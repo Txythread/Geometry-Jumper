@@ -2,6 +2,18 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
+
+using UnityEngine;
+
+public static class ColorExtensions
+{
+    public static Color WithAlpha(this Color color, float alpha)
+    {
+        return new Color(color.r, color.g, color.b, alpha);
+    }
+}
+
+
 public class Orb : LevelObject, IInteractable
 {
     /// <summary>
@@ -17,10 +29,12 @@ public class Orb : LevelObject, IInteractable
 
     [SerializeField] private Color color;
     [SerializeField] private InteractionType interactionType;
+    [SerializeField] private float interactionVisualDelayTime;
     
     private float _currentStageTimeCounter;
     private bool _isGrowing = true;
     private float _originalSurrounderSize;
+    private float _lastInteractionTime = -1f;
 
     protected override void Awake()
     {
@@ -38,6 +52,8 @@ public class Orb : LevelObject, IInteractable
 
     public void Interact(Player player)
     {
+        _lastInteractionTime = interactionVisualDelayTime;
+        mainOrb.GetComponent<SpriteRenderer>().color = Color.white;
         switch (interactionType)
         {
             case InteractionType.None: 

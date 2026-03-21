@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.Transactions;
 using NUnit.Framework.Constraints;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -38,6 +39,9 @@ public class Player : MonoBehaviour
     /// </summary>
     [SerializeField] private float rotationSpeedOnGround;
 
+    /// <summary>
+    /// The maximum velocity in either direction that the SetVelocity function supports
+    /// </summary>
     [SerializeField] private float maximumVelocity;
     
     /// <summary>
@@ -65,6 +69,7 @@ public class Player : MonoBehaviour
     ////////////////////////////////
     private RaycastHit2D _rayBuffer;
     private Vector3 _bottomPos;
+    private Vector3 _topPos;
     private Vector3 _forwardPos;
     private Vector2 _origin;
     private InputAction _jumpAction;
@@ -101,8 +106,11 @@ public class Player : MonoBehaviour
         
         
         _bottomPos = transform.position + Vector3.down * (PlayerHeight / 2 + 0.01f);
+        _topPos = transform.position + Vector3.up * (PlayerHeight / 2 + 0.01f);
 
         _lastFramePosition = transform.position;
+
+        //gravity = -gravity;
     }
 
    
@@ -118,6 +126,7 @@ public class Player : MonoBehaviour
         var (actionStart,  actionPersist) = GetInputs();
 
         SnapToContinuousWallCheckPosition();
+        _lastFramePosition = transform.position;
         
         // Update globals to current values
         _origin = transform.position - (Vector3.left + Vector3.up) * (PlayerHeight / 2 - 0.1f);
@@ -140,11 +149,9 @@ public class Player : MonoBehaviour
         }
 
         var currentRotation = transform.rotation.eulerAngles.z % 90;
-        Debug.Log("Current rotation: " + currentRotation);
         HandleRotationAndLanding(ref currentRotation, ref posChangeY);
         
         _lastFrameGrounded = grounded;
-        _lastFramePosition = transform.position;
         
         gameObject.transform.position += Vector3.up * posChangeY;
 
@@ -199,19 +206,24 @@ public class Player : MonoBehaviour
         var rotationDegrees = transform.rotation.eulerAngles.z % 90;
         var diagonalLength = 1.4142136f;
         var centerToGroundDistance = Mathf.Cos(Mathf.Deg2Rad * (45 - rotationDegrees)) * (diagonalLength / 2);
+
+        if (gravity < 0)
+        {
+            centerToGroundDistance = -centerToGroundDistance;
+        }
         
         var correspondingPlayerY = wallPos.y - centerToGroundDistance;
         var playerChangeY = -transform.position.y + correspondingPlayerY;
         
         // Skip if the player is moving in the direction already
-        if (positionChange.y > 0 == playerChangeY > 0)
+        if (positionChange.y > 0 != playerChangeY > 0)
         {
             return;} 
         
         // Set the player to the calculated position
         transform.position += new Vector3(0, playerChangeY, 0);
         
-        if (centerToGroundDistance < 0.48 | centerToGroundDistance > 0.52) {Debug.Log("Dist: " + centerToGroundDistance);Debug.Break();}
+        //if (centerToGroundDistance < 0.48 | centerToGroundDistance > 0.52) {Debug.Log("Dist: " + centerToGroundDistance);Debug.Break();}
     }
 
     private void HandleGravity()
@@ -244,18 +256,15 @@ public class Player : MonoBehaviour
                 {
                     targetRotationDistance = 90 - targetRotationDistance;
                 }
-            
+
                 if (Mathf.Abs(targetRotationDistance) < 5)
                 {
                     targetRotationDistance = 0;
                 }
             }
-            
+
         }
-        
-        
-        Debug.Log(targetRotationDistance);
-        
+
         if (grounded)
         {
             posChangeY = 0;
@@ -271,16 +280,13 @@ public class Player : MonoBehaviour
             if (targetRotationDistance > 3 | targetRotationDistance < -3)
             {
                 var frameNewRotation = rotationSpeedOnGround * Time.deltaTime;
-                Debug.Log("1. FNR: " + frameNewRotation + "distance: " + targetRotationDistance + " expecting: " + (currentRotation + frameNewRotation > Mathf.Abs(targetRotationDistance)));
                 if (frameNewRotation + currentRotation > Mathf.Abs(targetRotationDistance))
                 {
-                    Debug.Log("2. current rotation (" + currentRotation + ") & FNR are greater than targetRotationDistance: " + targetRotationDistance);
                     transform.Rotate(Vector3.back, targetRotationDistance);
                     targetRotationDistance = 0;
                 }
                 else
                 {
-                    Debug.Log("2. FNR: " + frameNewRotation + " updated distance: " + targetRotationDistance);
                     if (targetRotationDistance > 0)
                     {
                         transform.Rotate(Vector3.back, frameNewRotation);
@@ -344,8 +350,10 @@ public class Player : MonoBehaviour
         if (_jumpingBlockedFrames > 0) return;
         
         grounded = false;
-        transform.position += Vector3.up * 0.4f;
-        velocityY = jumpVelocity * multiplier;
+        var directionVec = gravity < 0 ? Vector3.up : Vector3.down;
+        var directionFactor = gravity < 0 ? 1 : -1;
+        transform.position += directionVec * 0.4f;
+        velocityY = jumpVelocity * multiplier * directionFactor;
 
         _jumpingBlockedFrames = 3;
     }
@@ -432,16 +440,21 @@ public class Player : MonoBehaviour
 
         if (Debug.isDebugBuild)
         {
-            Debug.DrawLine(_bottomPos, _bottomPos + (Vector3.down * rayLength), Color.green);
+            Debug.DrawLine(_topPos, _topPos + (Vector3.down * rayLength), Color.green);
         }
         
         _bottomPos = transform.position + Vector3.down * (PlayerHeight / 2 + 0.01f);
+        _topPos = transform.position + Vector3.up * (PlayerHeight / 2 + 0.01f);
+        var searchPos = gravity < 0 ? _bottomPos : _topPos;
+        var searchDir = gravity < 0 ? Vector2.down : Vector2.up;
         
-        _rayBuffer = Physics2D.Raycast(_bottomPos, Vector2.down, 0.01f, LayerMask.GetMask(_wallSearchMap));
+        
+        
+        _rayBuffer = Physics2D.Raycast(searchPos, searchDir, 0.01f, LayerMask.GetMask(_wallSearchMap));
         grounded |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_bottomPos - Vector3.left * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask(_wallSearchMap));
+        _rayBuffer = Physics2D.Raycast(searchPos - Vector3.left * 0.5f, searchDir, 0.01f, LayerMask.GetMask(_wallSearchMap));
         grounded |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_bottomPos - Vector3.right * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask(_wallSearchMap));
+        _rayBuffer = Physics2D.Raycast(searchPos - Vector3.right * 0.5f, searchDir, 0.01f, LayerMask.GetMask(_wallSearchMap));
         grounded |= _rayBuffer.collider != null;
 
         return grounded;
@@ -472,6 +485,7 @@ public class Player : MonoBehaviour
     
     private void Die()
     { 
+        Debug.Log("Died");
         Debug.Break();
         //Destroy(gameObject);
     }
