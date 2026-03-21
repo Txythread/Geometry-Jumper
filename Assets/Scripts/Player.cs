@@ -57,6 +57,7 @@ public class Player : MonoBehaviour
     /// one input being processed as multiple inputs
     /// </summary>
     private byte _jumpingBlockedFrames;
+    private Vector2 _lastFramePosition;
     
     ////////////////////////////////
     ////  Variables as buffers  ////
@@ -100,6 +101,8 @@ public class Player : MonoBehaviour
         
         
         _bottomPos = transform.position + Vector3.down * (PlayerHeight / 2 + 0.01f);
+
+        _lastFramePosition = transform.position;
     }
 
    
@@ -114,29 +117,34 @@ public class Player : MonoBehaviour
 
         var (actionStart,  actionPersist) = GetInputs();
 
+        SnapToContinuousWallCheckPosition();
         
         // Update globals to current values
         _origin = transform.position - (Vector3.left + Vector3.up) * (PlayerHeight / 2 - 0.1f);
         _forwardPos = transform.position + Vector3.right * (PlayerHeight / 2 - 0.1f);
         
-        var currentRotation = transform.rotation.eulerAngles.z;
+        
         HandleGravity();
 
         var posChangeY = velocityY * Time.deltaTime;
+
+        
+        PerformInteractions(actionStart);
         
         // Jump if necessary
         if (CheckGrounded() && actionPersist)
         {
             _inputEarlyDelay = 0;
-            SetPositionOnGround();
 
             if (grounded) Jump();
         }
 
-        
+        var currentRotation = transform.rotation.eulerAngles.z % 90;
+        Debug.Log("Current rotation: " + currentRotation);
         HandleRotationAndLanding(ref currentRotation, ref posChangeY);
         
         _lastFrameGrounded = grounded;
+        _lastFramePosition = transform.position;
         
         gameObject.transform.position += Vector3.up * posChangeY;
 
@@ -147,7 +155,63 @@ public class Player : MonoBehaviour
         
         CheckDead();
         
-        PerformInteractions(actionStart);
+        
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(_lastFramePosition, new Vector3(PlayerHeight, PlayerHeight));
+    }
+
+
+    /// <summary>
+    /// Performs a simple continuous check to get if the player hit the wall
+    /// and snaps the player to the position of the wall if said event took
+    /// place.
+    /// This method requires _lastFramePosition to have been set accordingly
+    /// </summary>
+    private void SnapToContinuousWallCheckPosition()
+    {
+        // Skip the check if the jump was currently initiated
+        if (_jumpingBlockedFrames > 0) return;
+        
+        
+        // Use a box cast to get the wall
+        var origin = _lastFramePosition;
+        var size = new Vector2(PlayerHeight, PlayerHeight);
+        var angle = transform.rotation.eulerAngles.z;
+        var positionChange = (Vector2)transform.position - origin;
+        var direction = positionChange.normalized;
+        var distance = positionChange.magnitude;
+        var layerMask = LayerMask.GetMask(_wallSearchMap);
+        Debug.DrawRay(origin, direction, Color.magenta);
+        var hit = Physics2D.BoxCast(origin, size, angle, direction, distance, layerMask);
+
+        if (hit.collider == null) return;
+        
+        // Get the position of the wall
+        var wallPos = hit.point;
+        
+        // Calculate what position that would be for the player
+        // We only care about the y position for now
+        //Debug.Break();
+        var rotationDegrees = transform.rotation.eulerAngles.z % 90;
+        var diagonalLength = 1.4142136f;
+        var centerToGroundDistance = Mathf.Cos(Mathf.Deg2Rad * (45 - rotationDegrees)) * (diagonalLength / 2);
+        
+        var correspondingPlayerY = wallPos.y - centerToGroundDistance;
+        var playerChangeY = -transform.position.y + correspondingPlayerY;
+        
+        // Skip if the player is moving in the direction already
+        if (positionChange.y > 0 == playerChangeY > 0)
+        {
+            return;} 
+        
+        // Set the player to the calculated position
+        transform.position += new Vector3(0, playerChangeY, 0);
+        
+        if (centerToGroundDistance < 0.48 | centerToGroundDistance > 0.52) {Debug.Log("Dist: " + centerToGroundDistance);Debug.Break();}
     }
 
     private void HandleGravity()
@@ -189,7 +253,10 @@ public class Player : MonoBehaviour
             
         }
         
-        if (grounded && _jumpingBlockedFrames == 0)
+        
+        Debug.Log(targetRotationDistance);
+        
+        if (grounded)
         {
             posChangeY = 0;
             velocityY = 0;
@@ -197,30 +264,35 @@ public class Player : MonoBehaviour
             // Make sure to get to the ground exactly
             if (!_lastFrameGrounded)
             {
-                SetPositionOnGround();
+                //SetPositionOnGround();
             }
 
             // Handle rotation on ground
             if (targetRotationDistance > 3 | targetRotationDistance < -3)
             {
                 var frameNewRotation = rotationSpeedOnGround * Time.deltaTime;
-                if (currentRotation + frameNewRotation > Mathf.Abs(targetRotationDistance))
+                Debug.Log("1. FNR: " + frameNewRotation + "distance: " + targetRotationDistance + " expecting: " + (currentRotation + frameNewRotation > Mathf.Abs(targetRotationDistance)));
+                if (frameNewRotation + currentRotation > Mathf.Abs(targetRotationDistance))
                 {
+                    Debug.Log("2. current rotation (" + currentRotation + ") & FNR are greater than targetRotationDistance: " + targetRotationDistance);
                     transform.Rotate(Vector3.back, targetRotationDistance);
                     targetRotationDistance = 0;
                 }
                 else
                 {
+                    Debug.Log("2. FNR: " + frameNewRotation + " updated distance: " + targetRotationDistance);
                     if (targetRotationDistance > 0)
                     {
                         transform.Rotate(Vector3.back, frameNewRotation);
                         targetRotationDistance -= frameNewRotation;
+                        
                     }
                     else
                     {
                         transform.Rotate(Vector3.back, -frameNewRotation);
                         targetRotationDistance += frameNewRotation;
                     }
+                    
                 }
             }
         }
@@ -269,6 +341,8 @@ public class Player : MonoBehaviour
     
     public void Jump(float multiplier = 1)
     {
+        if (_jumpingBlockedFrames > 0) return;
+        
         grounded = false;
         transform.position += Vector3.up * 0.4f;
         velocityY = jumpVelocity * multiplier;
@@ -293,7 +367,7 @@ public class Player : MonoBehaviour
 
         if (hit != null)
         {
-            Interactable interactable = hit.GetComponent<Interactable>();
+            var interactable = hit.GetComponent<IInteractable>();
 
             if (interactable == null) return;
             
@@ -363,11 +437,11 @@ public class Player : MonoBehaviour
         
         _bottomPos = transform.position + Vector3.down * (PlayerHeight / 2 + 0.01f);
         
-        _rayBuffer = Physics2D.Raycast(_bottomPos, Vector2.down, 0.01f, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_bottomPos, Vector2.down, 0.01f, LayerMask.GetMask(_wallSearchMap));
         grounded |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_bottomPos - Vector3.left * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_bottomPos - Vector3.left * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask(_wallSearchMap));
         grounded |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_bottomPos - Vector3.right * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask("Wall"));
+        _rayBuffer = Physics2D.Raycast(_bottomPos - Vector3.right * 0.5f, Vector2.down, 0.01f, LayerMask.GetMask(_wallSearchMap));
         grounded |= _rayBuffer.collider != null;
 
         return grounded;
@@ -380,32 +454,26 @@ public class Player : MonoBehaviour
     private void CheckDead()
     {
         // Check if blocked in front
-        var hit = false;
-        
-        const float rayLength = 0.01f;
-        
-        
-        _rayBuffer = Physics2D.Raycast(_forwardPos, Vector2.right, rayLength, LayerMask.GetMask(_wallSearchMap));
-        hit |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.up * 0.3f, Vector2.right, rayLength, LayerMask.GetMask(_wallSearchMap));
-        hit |= _rayBuffer.collider != null;
-        _rayBuffer = Physics2D.Raycast(_forwardPos - Vector3.down * 0.3f, Vector2.right, rayLength, LayerMask.GetMask(_wallSearchMap));
-        hit |= _rayBuffer.collider != null;
+        var mask = LayerMask.GetMask("Wall", "Deadly");
+        var angle = transform.rotation.eulerAngles.z;
+        var overlapResult = Physics2D.OverlapBox(transform.position, new Vector2(PlayerHeight/2-0.1f, PlayerHeight/2-0.1f), 0, mask);
+        var hit = overlapResult != null;
 
-        if (hit) Die();
+        if (hit) { Debug.Log("Dying due to wall") ; Die(); }
         
         // Check for spikes and such
-        if (Physics2D.BoxCast(_origin, new Vector2(0.8f, 0.8f), 0, Vector2.zero, 0.1f, LayerMask.GetMask("Deadly"))
+        /*if (Physics2D.BoxCast(_origin, new Vector2(0.8f, 0.8f), 0, Vector2.zero, 0.1f, LayerMask.GetMask("Deadly"))
                 .collider != null)
         {
+            Debug.Log("Dying due to spike");
             Die();
-        }
+        }*/
     }
     
     private void Die()
-    {
+    { 
         Debug.Break();
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 }
 

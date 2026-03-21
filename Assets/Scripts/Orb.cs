@@ -2,7 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Orb : LevelObject, Interactable
+public class Orb : LevelObject, IInteractable
 {
     /// <summary>
     /// How a growth/shrinking stage takes
