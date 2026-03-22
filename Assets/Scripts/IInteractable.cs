@@ -1,4 +1,4 @@
 public interface IInteractable
 {
-    void Interact(Player player);
+    void Interact(Player player, bool actionPresent);
 }

@@ -139,21 +139,23 @@ public class Player : MonoBehaviour
 
         var posChangeY = velocityY * Time.deltaTime;
 
-        
-        PerformInteractions(actionStart);
+        CheckGrounded();
+        PerformInteractions(ref actionStart, ref actionPersist);
+        _lastFrameGrounded = grounded;
         
         // Jump if necessary
-        if (CheckGrounded() && actionPersist)
+        if (grounded && actionPersist)
         {
             _inputEarlyDelay = 0;
 
-            if (grounded) Jump();
+            Debug.Log("Jumping on own accord");
+            Jump();
         }
 
         var currentRotation = transform.rotation.eulerAngles.z % 90;
         HandleRotationAndLanding(ref currentRotation, ref posChangeY);
         
-        _lastFrameGrounded = grounded;
+        
         
         gameObject.transform.position += Vector3.up * posChangeY;
 
@@ -198,33 +200,17 @@ public class Player : MonoBehaviour
 
         if (hit.collider == null) return;
         
-        // Get the position of the wall
-        var wallPos = hit.point;
+        var correspondingPlayerY = hit.centroid.y;
         
-        // Calculate what position that would be for the player
-        // We only care about the y position for now
-        //Debug.Break();
-        var rotationDegrees = transform.rotation.eulerAngles.z % 90;
-        var diagonalLength = 1.4142136f;
-        var centerToGroundDistance = Mathf.Cos(Mathf.Deg2Rad * (45 - rotationDegrees)) * (diagonalLength / 2);
-
-        if (gravity < 0)
-        {
-            centerToGroundDistance = -centerToGroundDistance;
-        }
+        var playerChangeY = correspondingPlayerY - transform.position.y;
         
-        var correspondingPlayerY = wallPos.y - centerToGroundDistance;
-        var playerChangeY = -transform.position.y + correspondingPlayerY;
-        
-        // Skip if the player is moving in the direction already
         if (positionChange.y > 0 != playerChangeY > 0)
-        {
-            return;} 
         
-        // Set the player to the calculated position
-        transform.position += new Vector3(0, playerChangeY, 0);
+        SetVelocityY(0);
         
-        //if (centerToGroundDistance < 0.48 | centerToGroundDistance > 0.52) {Debug.Log("Dist: " + centerToGroundDistance);Debug.Break();}
+        
+        
+        transform.position = new Vector3(transform.position.x, correspondingPlayerY, 0);
     }
 
     private void HandleGravity()
@@ -348,24 +334,25 @@ public class Player : MonoBehaviour
     
     public void Jump(float multiplier = 1)
     {
+        Debug.Log("Jumping with multiplier: " + multiplier);
         if (_jumpingBlockedFrames > 0) return;
         
         grounded = false;
         var directionVec = gravity < 0 ? Vector3.up : Vector3.down;
         var directionFactor = gravity < 0 ? 1 : -1;
-        transform.position += directionVec * 0.4f;
+        transform.position += directionVec * 0.6f;
         velocityY = jumpVelocity * multiplier * directionFactor;
 
-        _jumpingBlockedFrames = 3;
+        _jumpingBlockedFrames = 5;
     }
 
     /// <summary>
     /// Checks which interactable objects the player touches and
     /// potentially triggers their onInteract actions.
     /// </summary>
-    private void PerformInteractions(bool interactionStarted)
+    private void PerformInteractions(ref bool interactionStarted, ref bool interactionPersists)
     {
-        if (!interactionStarted) return;
+        //if (!interactionStarted) return;
         
         Vector2 origin = transform.position;
         var size = new Vector2(PlayerHeight, PlayerHeight);
@@ -380,7 +367,14 @@ public class Player : MonoBehaviour
 
             if (interactable == null) return;
             
-            interactable.Interact(this);
+            interactable.Interact(this, interactionStarted);
+            if (interactionStarted)
+            {
+                Debug.Log("Ungrounding");
+                interactionStarted = false;
+                interactionPersists = false;
+                grounded = false;
+            }
             
             // Make sure no other interaction can follow until it's pressed again
             _inputEarlyDelay = 0;

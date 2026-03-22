@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: interactionType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5459347706646798995, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
+      propertyPath: primaryInteractionType
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8665429959418428674, guid: ad644a95ee56b49feb5639c86d7c38a6, type: 3}
       propertyPath: m_Color.b
       value: 0.7535238
